@@ -40,8 +40,8 @@ final class SettingsTableViewControllerSnapshotTests: ZMSnapshotTestCase {
         super.tearDown()
 	}
 
-    func testForSettingGroup() {
-        let group = settingsCellDescriptorFactory.settingsGroup()
+    func testForSettingRootGroup() {
+        let group = settingsCellDescriptorFactory.rootGroup()
         sut = SettingsTableViewController(group: group)
 
         sut.view.backgroundColor = .black

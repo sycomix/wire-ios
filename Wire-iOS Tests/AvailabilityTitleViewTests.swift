@@ -21,7 +21,6 @@ import XCTest
 
 class AvailabilityTitleViewTests: ZMSnapshotTestCase {
 
-    var sut: AvailabilityTitleView?
     var selfUser: ZMUser!
     var otherUser: ZMUser?
     
@@ -33,13 +32,12 @@ class AvailabilityTitleViewTests: ZMSnapshotTestCase {
     }
 
     override func tearDown() {
-        sut = nil
         selfUser = nil
         otherUser = nil
         super.tearDown()
     }
     
-    // MARK: - Self profile
+    // MARK: - Self Profile
     
     func testThatItRendersCorrectly_SelfProfile_NoneAvailability() {
         createTest(for: .selfProfile, with: .none, on: selfUser)
@@ -78,34 +76,28 @@ class AvailabilityTitleViewTests: ZMSnapshotTestCase {
     // MARK: - Other profile
     
     func testThatItRendersCorrectly_OtherProfile_NoneAvailability() {
-        createTest(for: .otherProfile, with: .none, on: otherUser!)
+        createTest(for: .profileDetails, with: .none, on: otherUser!)
     }
     
     func testThatItRendersCorrectly_OtherProfile_AvailableAvailability() {
-        createTest(for: .otherProfile, with: .available, on: otherUser!)
+        createTest(for: .profileDetails, with: .available, on: otherUser!)
     }
     
     func testThatItRendersCorrectly_OtherProfile_AwayAvailability() {
-        createTest(for: .otherProfile, with: .away, on: otherUser!)
+        createTest(for: .profileDetails, with: .away, on: otherUser!)
     }
     
     func testThatItRendersCorrectly_OtherProfile_BusyAvailability() {
-        createTest(for: .otherProfile, with: .busy, on: otherUser!)
+        createTest(for: .profileDetails, with: .busy, on: otherUser!)
     }
     
     // MARK: - Common methods
     
-    private func createTest(for style: AvailabilityTitleViewStyle, with availability: Availability, on user: ZMUser) {
+    private func createTest(for options: AvailabilityTitleView.Options, with availability: Availability, on user: ZMUser, file: StaticString = #file, line: UInt = #line) {
         updateAvailability(for: user, newValue: availability)
-        self.sut = AvailabilityTitleView(user: user, style: style)
-        guard let sut = self.sut else { XCTFail(); return }
-        sut.configure(user: user)
-        
-        switch style {
-            case .header, .selfProfile:     sut.backgroundColor = .black
-            case .otherProfile:             sut.backgroundColor = .white
-        }
-        verify(view: sut)
+        let sut = AvailabilityTitleView(user: user, options: options)
+        sut.backgroundColor = options.contains(.useDarkAppearance) ? .black : .white
+        verify(view: sut, file: file, line: line)
     }
     
     func updateAvailability(for user: ZMUser, newValue: Availability) {

@@ -53,6 +53,8 @@ protocol SettingsCellType: class {
     let separatorLine = UIView()
     let topSeparatorLine = UIView()
     var cellNameLabelToIconInset: NSLayoutConstraint!
+    
+    static let defaultBackgroundColor = UIColor(white: 1, alpha: 4/100)
 
     var variant: ColorSchemeVariant? = .none {
         didSet {
@@ -178,7 +180,7 @@ protocol SettingsCellType: class {
     }
     
     func setup() {
-        backgroundColor = UIColor.clear
+        backgroundColor = SettingsTableCell.defaultBackgroundColor
         backgroundView = UIView()
         selectedBackgroundView = UIView()
         
@@ -295,7 +297,7 @@ protocol SettingsCellType: class {
             badgeLabel.textColor = UIColor.black
         }
         else {
-            backgroundColor = UIColor.clear
+            backgroundColor = SettingsTableCell.defaultBackgroundColor
         }
     }
 }

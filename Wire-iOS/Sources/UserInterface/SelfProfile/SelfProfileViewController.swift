@@ -17,30 +17,16 @@
 //
 
 import UIKit
-import Cartography
 
-extension Notification.Name {
-    static let DismissSettings = Notification.Name("DismissSettings")
-}
+/**
+ * The view controller displaying the profile of the user and the
+ * initial set of settings.
+ */
 
-extension SelfProfileViewController: SettingsPropertyFactoryDelegate {
-    func asyncMethodDidStart(_ settingsPropertyFactory: SettingsPropertyFactory) {
-        self.navigationController?.topViewController?.showLoadingView = true
-    }
-
-    func asyncMethodDidComplete(_ settingsPropertyFactory: SettingsPropertyFactory) {
-        self.navigationController?.topViewController?.showLoadingView = false
-    }
-
-
-}
-
-final class SelfProfileViewController: UIViewController {
+class SelfProfileViewController: UIViewController {
     
     var userRightInterfaceType: UserRightInterface.Type = UserRight.self
 
-    static let dismissNotificationName = "SettingsNavigationControllerDismissNotificationName"
-    
     private let settingsController: SettingsTableViewController
     private let accountSelectorController = AccountSelectorController()
     private let profileContainerView = UIView()
@@ -70,21 +56,18 @@ final class SelfProfileViewController: UIViewController {
     
     init(rootGroup: SettingsControllerGeneratorType & SettingsInternalGroupCellDescriptorType) {
         settingsController = rootGroup.generateViewController()! as! SettingsTableViewController
-        profileView = ProfileView(user: ZMUser.selfUser())
-        
+        profileView = ProfileView(user: ZMUser.selfUser(), options: [.allowEditingAvailability])
         super.init(nibName: .none, bundle: .none)
                 
         profileView.source = self
         profileView.imageView.addTarget(self, action: #selector(userDidTapProfileImage), for: .touchUpInside)
-        
-        settingsController.tableView.isScrollEnabled = false
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(SelfProfileViewController.dismissNotification(_:)), name: NSNotification.Name.DismissSettings, object: nil)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Configuration
     
     override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
         return [.portrait]
@@ -94,22 +77,23 @@ final class SelfProfileViewController: UIViewController {
         return .lightContent
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        profileContainerView.shouldGroupAccessibilityChildren = false
-        profileContainerView.isAccessibilityElement = false
+        if ZMUser.selfUser()?.isTeamMember != true {
+            profileView.options.insert(.hideAvailability)
+        }
+        
         profileContainerView.addSubview(profileView)
-        view.addSubview(profileContainerView)
         
         settingsController.willMove(toParent: self)
-        view.addSubview(settingsController.view)
         addChild(settingsController)
-        
-        settingsController.view.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
-        settingsController.view.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
-        settingsController.tableView.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
-        settingsController.tableView.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
+        view.addSubview(settingsController.view)
+        settingsController.didMove(toParent: self)
+
+        settingsController.tableView.tableHeaderView = profileContainerView
         
         createCloseButton()
         configureAccountTitle()
@@ -123,20 +107,7 @@ final class SelfProfileViewController: UIViewController {
             presentUserSettingChangeControllerIfNeeded()
         }
     }
-    
-    override func accessibilityPerformEscape() -> Bool {
-        dismiss()
-        return true
-    }
-    
-    private func dismiss() {
-        dismiss(animated: true)
-    }
-    
-    @objc func dismissNotification(_ notification: NSNotification) {
-        dismiss()
-    }
-    
+
     private func createCloseButton() {
         navigationItem.rightBarButtonItem = navigationController?.closeItem()
     }
@@ -145,57 +116,76 @@ final class SelfProfileViewController: UIViewController {
         if SessionManager.shared?.accountManager.accounts.count > 1 {
             navigationItem.titleView = accountSelectorController.view
         } else {
-            title = "self.account".localized.uppercased()
+            title = "self.account".localized(uppercased: true)
         }
     }
     
     private func createConstraints() {
-        var selfViewTopMargin: CGFloat = 12
-
-        if #available(iOS 11, *) {
-        } else {
-            if let navBarFrame = self.navigationController?.navigationBar.frame {
-                selfViewTopMargin = 32 + navBarFrame.size.height
-            }
-        }
-
-        constrain(view, profileContainerView) { selfView, profileContainerView in
-            profileContainerView.top == selfView.topMargin + selfViewTopMargin
-        }
-
-        constrain(accountSelectorController.view) { accountSelectorControllerView in
-            accountSelectorControllerView.height == 44
-        }
-
-        // Sometimes (i.e. after coming from background) the cells are not loaded yet. Reloading to calculate correct height.
-        settingsController.tableView.reloadData()
-        let height = CGFloat(56 * settingsController.tableView.numberOfRows(inSection: 0))
+        accountSelectorController.view.translatesAutoresizingMaskIntoConstraints = false
+        settingsController.view.translatesAutoresizingMaskIntoConstraints = false
+        profileView.translatesAutoresizingMaskIntoConstraints = false
         
-        constrain(view, settingsController.view, profileView, profileContainerView, settingsController.tableView) { view, settingsControllerView, profileView, profileContainerView, tableView in
-            profileContainerView.leading == view.leading
-            profileContainerView.trailing == view.trailing
-            profileContainerView.bottom == settingsControllerView.top
+        NSLayoutConstraint.activate([
+            // accountSelectorController
+            accountSelectorController.view.heightAnchor.constraint(equalToConstant: 44),
             
-            profileView.top >= profileContainerView.top
-            profileView.centerY == profileContainerView.centerY
-            profileView.leading == profileContainerView.leading
-            profileView.trailing == profileContainerView.trailing
-            profileView.bottom <= profileContainerView.bottom
+            // settingsControllerView
+            settingsController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            settingsController.view.topAnchor.constraint(equalTo: safeTopAnchor),
+            settingsController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            settingsController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            settingsControllerView.height == height
-            settingsControllerView.leading == view.leading
-            settingsControllerView.trailing == view.trailing
-            settingsControllerView.bottom == view.bottom - UIScreen.safeArea.bottom
-            
-            tableView.edges == settingsControllerView.edges
+            // profileView
+            profileView.leadingAnchor.constraint(equalTo: profileContainerView.leadingAnchor),
+            profileView.topAnchor.constraint(equalTo: profileContainerView.topAnchor),
+            profileView.trailingAnchor.constraint(equalTo: profileContainerView.trailingAnchor),
+            profileView.bottomAnchor.constraint(equalTo: profileContainerView.bottomAnchor)
+        ])
+    }
+
+    // MARK: - Events
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // Update the header
+        guard let headerView = settingsController.tableView.tableHeaderView else {
+            return
+        }
+        
+        let size = headerView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+
+        if headerView.frame.size.height != size.height {
+            headerView.frame.size.height = size.height
+            settingsController.tableView.tableHeaderView = headerView
+            settingsController.tableView.layoutIfNeeded()
         }
     }
     
-    @objc func userDidTapProfileImage(sender: UserImageView) {
+    override func accessibilityPerformEscape() -> Bool {
+        dismiss(animated: true)
+        return true
+    }
+    
+    @objc private func userDidTapProfileImage(sender: UserImageView) {
         guard userRightInterfaceType.selfUserIsPermitted(to: .editProfilePicture) else { return }
         
         let profileImageController = ProfileSelfPictureViewController()
         self.present(profileImageController, animated: true, completion: .none)
     }
+    
 }
 
+// MARK: - SettingsPropertyFactoryDelegate
+
+extension SelfProfileViewController: SettingsPropertyFactoryDelegate {
+    
+    func asyncMethodDidStart(_ settingsPropertyFactory: SettingsPropertyFactory) {
+        self.navigationController?.showLoadingView = true
+    }
+    
+    func asyncMethodDidComplete(_ settingsPropertyFactory: SettingsPropertyFactory) {
+        self.navigationController?.showLoadingView = false
+    }
+    
+}

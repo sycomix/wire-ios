@@ -35,7 +35,7 @@ class SettingsPropertySelectValueCellDescriptor: SettingsPropertyCellDescriptorT
     weak var group: SettingsGroupCellDescriptorType?
     var settingsProperty: SettingsProperty
     
-    init(settingsProperty: SettingsProperty, value: SettingsPropertyValue, title: String, identifier: String? = .none, selectAction: SelectActionType? = .none, backgroundColor: UIColor? = .none) {
+    init(settingsProperty: SettingsProperty, value: SettingsPropertyValue, title: String, identifier: String? = .none, selectAction: SelectActionType? = .none, backgroundColor: UIColor? = SettingsTableCell.defaultBackgroundColor) {
         self.settingsProperty = settingsProperty
         self.value = value
         self.title = title

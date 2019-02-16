@@ -19,17 +19,34 @@
 import Foundation
 import Cartography
 
-@objcMembers internal class ProfileView: UIView {
-    public let imageView =  UserImageView(size: .big)
-    public let nameLabel = UILabel()
-    public let handleLabel = UILabel()
+class ProfileView: UIView {
+    
+    struct Options: OptionSet {
+        let rawValue: Int
+
+        static let hideUsername = Options(rawValue: 1 << 0)
+        static let hideHandle = Options(rawValue: 1 << 1)
+        static let hideAvailability = Options(rawValue: 1 << 2)
+        static let allowEditingAvailability = Options(rawValue: 1 << 3)
+    }
+    
+    var options: Options {
+        didSet {
+            applyOptions()
+        }
+    }
+    
+    let imageView =  UserImageView(size: .big)
+    let nameLabel = UILabel()
+    let handleLabel = UILabel()
     public let teamNameLabel = UILabel()
-    public var availabilityView = AvailabilityTitleView(user: ZMUser.selfUser(), style: .selfProfile)
+    public var availabilityView = AvailabilityTitleView(user: ZMUser.selfUser(), options: .selfProfile)
     var stackView : CustomSpacingStackView!
     var userObserverToken: NSObjectProtocol?
     weak var source: UIViewController?
     
-    init(user: ZMUser) {
+    init(user: ZMUser, options: Options) {
+        self.options = options
         super.init(frame: .zero)
         let session = SessionManager.shared?.activeUserSession
         imageView.accessibilityIdentifier = "user image"
@@ -42,6 +59,7 @@ import Cartography
         
         availabilityView.tapHandler = { [weak self] button in
             guard let `self` = self else { return }
+            guard self.options.contains(.allowEditingAvailability) else { return }
             let alert = self.availabilityView.actionSheet
             alert.popoverPresentationController?.sourceView = self
             alert.popoverPresentationController?.sourceRect = self.availabilityView.frame
@@ -57,7 +75,7 @@ import Cartography
         nameLabel.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
         nameLabel.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
         nameLabel.textColor = UIColor.from(scheme: .textForeground, variant: .dark)
-        nameLabel.font = FontSpec(.large, .light).font!
+        nameLabel.font = FontSpec(.large, .medium).font!
         handleLabel.accessibilityLabel = "profile_view.accessibility.handle".localized
         handleLabel.accessibilityIdentifier = "username"
         handleLabel.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
@@ -79,9 +97,9 @@ import Cartography
             teamNameLabel.accessibilityValue = teamNameLabel.text
         } else {
             teamNameLabel.isHidden = true
-            availabilityView.isHidden = true
         }
         
+        availabilityView.isHidden = options.contains(.hideAvailability)
         updateHandleLabel(user: user)
         
         stackView = CustomSpacingStackView(customSpacedArrangedSubviews: [nameLabel, handleLabel, teamNameLabel, imageView, availabilityView])
@@ -108,14 +126,26 @@ import Cartography
     }
     
     private func createConstraints() {
-        constrain(self, stackView, imageView) { selfView, stackView, imageView in
-            stackView.top == selfView.top
-            stackView.bottom <= selfView.bottom
-            stackView.leading == selfView.leading
-            stackView.trailing == selfView.trailing
-            imageView.leading >= selfView.leading + 40
-            imageView.trailing <= selfView.trailing - 40
-        }
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            // imageView
+            imageView.widthAnchor.constraint(equalToConstant: 164),
+            imageView.heightAnchor.constraint(equalToConstant: 164),
+            
+            // stackView
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 40),
+            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 20),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20)
+        ])
+    }
+    
+    private func applyOptions() {
+        nameLabel.isHidden = options.contains(.hideUsername)
+        handleLabel.isHidden = options.contains(.hideHandle)
+        availabilityView.isHidden = options.contains(.hideAvailability)
     }
     
     required init?(coder aDecoder: NSCoder) {

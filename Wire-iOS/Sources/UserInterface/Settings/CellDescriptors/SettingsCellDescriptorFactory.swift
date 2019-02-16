@@ -32,21 +32,21 @@ class SettingsCellDescriptorFactory {
     }
     
     func rootGroup() -> SettingsControllerGeneratorType & SettingsInternalGroupCellDescriptorType {
-        var rootElements: [SettingsCellDescriptorType] = []
+        var sections: [SettingsSectionDescriptorType] = [settingsSection()]
         
         if ZMUser.selfUser().canManageTeam {
-            rootElements.append(self.manageTeamCell())
+            let manageTeam = SettingsSectionDescriptor(cellDescriptors: [manageTeamCell()])
+            sections.append(manageTeam)
         }
         
-        rootElements.append(self.settingsGroup())
         #if MULTIPLE_ACCOUNTS_DISABLED
             // We skip "add account" cell
         #else
-            rootElements.append(self.addAccountOrTeamCell())
+            let addAccount = SettingsSectionDescriptor(cellDescriptors: [addAccountOrTeamCell()])
+            sections.append(addAccount)
         #endif
-        let topSection = SettingsSectionDescriptor(cellDescriptors: rootElements)
         
-        return SettingsGroupCellDescriptor(items: [topSection], title: "self.profile".localized, style: .plain)
+        return SettingsGroupCellDescriptor(items: sections, title: "self.profile".localized)
     }
     
     func inviteButton() -> SettingsCellDescriptorType {
@@ -108,16 +108,14 @@ class SettingsCellDescriptorFactory {
                                                     accessoryViewMode: .alwaysHide)
     }
     
-    func settingsGroup() -> SettingsControllerGeneratorType & SettingsInternalGroupCellDescriptorType {
+    func settingsSection() -> SettingsSectionDescriptor {
         var topLevelElements = [self.accountGroup(), self.devicesCell(), self.optionsGroup(), self.advancedGroup(), self.helpSection(), self.aboutSection()]
         
         if DeveloperMenuState.developerMenuEnabled() {
             topLevelElements.append(self.developerGroup())
         }
         
-        let topSection = SettingsSectionDescriptor(cellDescriptors: topLevelElements)
-
-        return SettingsGroupCellDescriptor(items: [topSection], title: "self.settings".localized, style: .plain, previewGenerator: .none, icon: .gear)
+        return SettingsSectionDescriptor(cellDescriptors: topLevelElements, header: "self.settings".localized)
     }
     
     func devicesCell() -> SettingsCellDescriptorType {
