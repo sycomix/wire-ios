@@ -150,6 +150,12 @@ class ProfileView: UIView {
         nameLabel.isHidden = options.contains(.hideUsername)
         handleLabel.isHidden = options.contains(.hideHandle)
         availabilityView.isHidden = options.contains(.hideAvailability)
+        
+        if options.contains(.allowEditingAvailability) {
+            availabilityView.options.insert(.allowSettingStatus)
+        } else {
+            availabilityView.options.remove(.allowSettingStatus)
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
