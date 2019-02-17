@@ -149,7 +149,7 @@ final class ChangePhoneViewController: SettingsBaseTableViewController {
 
             cell.phoneInputView.delegate = self
             cell.phoneInputView.textColor = .white
-            cell.phoneInputView.inputBackgroundColor = .clear
+            cell.phoneInputView.inputBackgroundColor = SettingsTableCell.defaultBackgroundColor
 
             updateSaveButtonState()
             return cell

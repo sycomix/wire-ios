@@ -39,9 +39,10 @@ class ProfileView: UIView {
     let imageView =  UserImageView(size: .big)
     let nameLabel = UILabel()
     let handleLabel = UILabel()
-    public let teamNameLabel = UILabel()
-    public var availabilityView = AvailabilityTitleView(user: ZMUser.selfUser(), options: .selfProfile)
-    var stackView : CustomSpacingStackView!
+    let teamNameLabel = UILabel()
+    let availabilityView = AvailabilityTitleView(user: ZMUser.selfUser(), options: .selfProfile)
+    let stackView = UIStackView()
+    
     var userObserverToken: NSObjectProtocol?
     weak var source: UIViewController?
     
@@ -76,12 +77,19 @@ class ProfileView: UIView {
         nameLabel.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
         nameLabel.textColor = UIColor.from(scheme: .textForeground, variant: .dark)
         nameLabel.font = FontSpec(.large, .medium).font!
+        
         handleLabel.accessibilityLabel = "profile_view.accessibility.handle".localized
         handleLabel.accessibilityIdentifier = "username"
         handleLabel.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
         handleLabel.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
         handleLabel.textColor = UIColor.from(scheme: .textForeground, variant: .dark)
         handleLabel.font = FontSpec(.small, .regular).font!
+        
+        let nameHandleStack = UIStackView(arrangedSubviews: [nameLabel, handleLabel])
+        nameHandleStack.axis = .vertical
+        nameHandleStack.alignment = .center
+        nameHandleStack.spacing = 2
+        
         teamNameLabel.accessibilityLabel = "profile_view.accessibility.team_name".localized
         teamNameLabel.accessibilityIdentifier = "team name"
         teamNameLabel.setContentHuggingPriority(UILayoutPriority.required, for: .vertical)
@@ -102,14 +110,10 @@ class ProfileView: UIView {
         availabilityView.isHidden = options.contains(.hideAvailability)
         updateHandleLabel(user: user)
         
-        stackView = CustomSpacingStackView(customSpacedArrangedSubviews: [nameLabel, handleLabel, teamNameLabel, imageView, availabilityView])
+        [nameHandleStack, teamNameLabel, imageView, availabilityView].forEach(stackView.addArrangedSubview)
         stackView.alignment = .center
         stackView.axis = .vertical
-        stackView.spacing = 2
-        stackView.wr_addCustomSpacing(32, after: handleLabel)
-        stackView.wr_addCustomSpacing(32, after: teamNameLabel)
-        stackView.wr_addCustomSpacing(32, after: imageView)
-        stackView.wr_addCustomSpacing(32, after: availabilityView)
+        stackView.spacing = 32
         addSubview(stackView)
         
         self.createConstraints()
