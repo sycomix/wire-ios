@@ -16,40 +16,87 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
-import Foundation
-import Cartography
+import UIKit
+
+/**
+ * A view that displays the overview of a profile for a user.
+ */
+
 
 class ProfileView: UIView {
     
+    /**
+     * The options to customize the appearance and behavior of the view.
+     */
+    
     struct Options: OptionSet {
+        
         let rawValue: Int
 
+        /// Whether to hide the username of the user.
         static let hideUsername = Options(rawValue: 1 << 0)
+        
+        /// Whether to hide the handle of the user.
         static let hideHandle = Options(rawValue: 1 << 1)
+        
+        /// Whether to hide the availability status of the user.
         static let hideAvailability = Options(rawValue: 1 << 2)
+        
+        /// Whether to allow the user to change their availability.
         static let allowEditingAvailability = Options(rawValue: 1 << 3)
+    
     }
     
+    /// The user that is displayed.
+    let user: ZMUser
+    
+    /// The view controller that displays the view.
+    weak var source: UIViewController?
+    
+    /// The options to customize the appearance and behavior of the view.
     var options: Options {
         didSet {
             applyOptions()
         }
     }
     
-    let imageView =  UserImageView(size: .big)
+    // MARKL: - Properties
+    
+    let stackView = UIStackView()
+    
     let nameLabel = UILabel()
     let handleLabel = UILabel()
     let teamNameLabel = UILabel()
+    let imageView =  UserImageView(size: .big)
     let availabilityView = AvailabilityTitleView(user: ZMUser.selfUser(), options: .selfProfile)
-    let stackView = UIStackView()
     
-    var userObserverToken: NSObjectProtocol?
-    weak var source: UIViewController?
+    private var userObserverToken: NSObjectProtocol?
     
+    // MARK: - Initialization
+    
+    /**
+     * Creates a profile view for the specified user and options.
+     * - parameter user: The user to display the profile of.
+     * - parameter options: The options for the appearance and behavior of the view.
+     * - note: You can change the options later through the `options` property.
+     */
+
     init(user: ZMUser, options: Options) {
+        self.user = user
         self.options = options
         super.init(frame: .zero)
+        configureSubviews()
+        configureConstraints()
+        applyOptions()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func configureSubviews() {
         let session = SessionManager.shared?.activeUserSession
+        
         imageView.accessibilityIdentifier = "user image"
         imageView.userSession = session
         imageView.user = user
@@ -101,13 +148,12 @@ class ProfileView: UIView {
         nameLabel.accessibilityValue = nameLabel.text
         
         if let team = user.team, let teamName = team.name {
-            teamNameLabel.text = teamName.uppercased()
+            teamNameLabel.text = teamName.localizedUppercase
             teamNameLabel.accessibilityValue = teamNameLabel.text
         } else {
             teamNameLabel.isHidden = true
         }
         
-        availabilityView.isHidden = options.contains(.hideAvailability)
         updateHandleLabel(user: user)
         
         [nameHandleStack, teamNameLabel, imageView, availabilityView].forEach(stackView.addArrangedSubview)
@@ -115,21 +161,9 @@ class ProfileView: UIView {
         stackView.axis = .vertical
         stackView.spacing = 32
         addSubview(stackView)
-        
-        self.createConstraints()
     }
     
-    fileprivate func updateHandleLabel(user: UserType) {
-        if let handle = user.handle, !handle.isEmpty {
-            handleLabel.text = "@" + handle
-            handleLabel.accessibilityValue = handleLabel.text
-        }
-        else {
-            handleLabel.isHidden = true
-        }
-    }
-    
-    private func createConstraints() {
+    private func configureConstraints() {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -146,6 +180,19 @@ class ProfileView: UIView {
         ])
     }
     
+    // MARK: - Content and Options
+    
+    private func updateHandleLabel(user: UserType) {
+        if let handle = user.handle, !handle.isEmpty {
+            handleLabel.text = "@" + handle
+            handleLabel.accessibilityValue = handleLabel.text
+            handleLabel.isHidden = !options.contains(.hideHandle)
+        }
+        else {
+            handleLabel.isHidden = true
+        }
+    }
+    
     private func applyOptions() {
         nameLabel.isHidden = options.contains(.hideUsername)
         handleLabel.isHidden = options.contains(.hideHandle)
@@ -158,10 +205,9 @@ class ProfileView: UIView {
         }
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }
+
+// MARK: - ZMUserObserver
 
 extension ProfileView: ZMUserObserver {
     func userDidChange(_ changeInfo: UserChangeInfo) {
