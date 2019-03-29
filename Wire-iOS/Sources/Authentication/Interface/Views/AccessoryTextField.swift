@@ -170,7 +170,13 @@ class AccessoryTextField: UITextField, TextContainer {
             autocorrectionType = .no
             autocapitalizationType = .none
             accessibilityIdentifier = "EmailField"
-            textContentType = .emailAddress
+
+            if #available(iOS 11, *) {
+                textContentType = .username
+            } else {
+                textContentType = .emailAddress
+            }
+
         case .password(let isNew):
             isSecureTextEntry = true
             accessibilityIdentifier = "PasswordField"
@@ -179,7 +185,7 @@ class AccessoryTextField: UITextField, TextContainer {
                 passwordRules = textFieldValidator.passwordRules
             }
             autocapitalizationType = .words
-            textContentType = .organizationName
+
         case .name(let isTeam):
             autocapitalizationType = .words
             accessibilityIdentifier = "NameField"

@@ -26,6 +26,7 @@ class AuthenticationInterfaceBuilderTests: ZMSnapshotTestCase {
 
     override func setUp() {
         super.setUp()
+        recordMode = true
         featureProvider = MockAuthenticationFeatureProvider()
         builder = AuthenticationInterfaceBuilder(featureProvider: featureProvider)
     }
