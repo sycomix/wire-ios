@@ -46,7 +46,7 @@ enum AuthenticationCoordinatorAction {
     case assignRandomProfileImage
     case continueFlowWithLoginCode(String)
     case switchCredentialsType(AuthenticationCredentialsType)
-    case startRegistrationFlow(UnverifiedCredentials)
+    case startRegistrationFlow(UnverifiedCredentials, password: String?)
     case startLoginFlow(AuthenticationLoginRequest)
     case setUserName(String)
     case setUserPassword(String)

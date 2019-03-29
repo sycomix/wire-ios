@@ -22,7 +22,7 @@ import Foundation
  * The view controller to use to ask the user to enter their credentials.
  */
 
-class AuthenticationCredentialsViewController: AuthenticationStepController, CountryCodeTableViewControllerDelegate, EmailPasswordTextFieldDelegate, PhoneNumberInputViewDelegate, TabBarDelegate, TextFieldValidationDelegate, UITextFieldDelegate {
+class AuthenticationCredentialsViewController: AuthenticationStepController, CountryCodeTableViewControllerDelegate, EmailPasswordTextFieldDelegate, PhoneNumberInputViewDelegate, TabBarDelegate {
 
     /// Types of flow provided by the view controller.
     enum FlowType {
@@ -85,7 +85,6 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
     let contentStack = UIStackView()
 
     let emailPasswordInputField = EmailPasswordTextField()
-    let emailInputField = AccessoryTextField(kind: .email)
     let phoneInputView = PhoneNumberInputView()
 
     let tabBar: TabBar = {
@@ -116,7 +115,6 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
         contentStack.spacing = 24
 
         contentStack.addArrangedSubview(tabBar)
-        contentStack.addArrangedSubview(emailInputField)
         contentStack.addArrangedSubview(emailPasswordInputField)
         contentStack.addArrangedSubview(phoneInputView)
 
@@ -126,17 +124,7 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
 
         // Email Password Input View
         emailPasswordInputField.delegate = self
-
-        // Email input view
-        emailInputField.delegate = self
-        emailInputField.textFieldValidationDelegate = self
-        emailInputField.placeholder = "email.placeholder".localized(uppercased: true)
-        emailInputField.addTarget(self, action: #selector(emailTextInputDidChange), for: .editingChanged)
-        emailInputField.confirmButton.addTarget(self, action: #selector(emailConfirmButtonTapped), for: .touchUpInside)
-
-        emailInputField.enableConfirmButton = { [weak self] in
-            self?.emailFieldValidationError == TextFieldValidator.ValidationError.none
-        }
+        emailPasswordInputField.passwordField.kind = .password(isNew: isRegistering)
 
         return contentStack
     }
@@ -159,7 +147,7 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
         case .registration?:
             switch credentialsType {
             case .phone: return phoneInputView
-            case .email: return emailInputField
+            case .email: return emailPasswordInputField
             }
         case .reauthentication?:
             switch credentialsType {
@@ -199,8 +187,7 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
 
         switch credentialsType {
         case .email:
-            emailPasswordInputField.isHidden = isRegistering
-            emailInputField.isHidden = !isRegistering
+            emailPasswordInputField.isHidden = false
             phoneInputView.isHidden = true
             tabBar.setSelectedIndex(0, animated: false)
             setSecondaryViewHidden(false)
@@ -208,7 +195,6 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
         case .phone:
             phoneInputView.isHidden = false
             emailPasswordInputField.isHidden = true
-            emailInputField.isHidden = true
             tabBar.setSelectedIndex(1, animated: false)
             setSecondaryViewHidden(true)
         }
@@ -239,7 +225,6 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
 
     override func clearInputFields() {
         phoneInputView.text = nil
-        emailInputField.text = nil
         emailPasswordInputField.emailField.text = nil
         emailPasswordInputField.passwordField.text = nil
         showKeyboard()
@@ -249,27 +234,6 @@ class AuthenticationCredentialsViewController: AuthenticationStepController, Cou
 
     override func accessibilityPerformMagicTap() -> Bool {
         return (contextualFirstResponder as? MagicTappable)?.performMagicTap() == true
-    }
-
-    @objc private func emailConfirmButtonTapped(sender: IconButton) {
-        valueSubmitted(emailInputField.input)
-    }
-
-    @objc private func emailTextInputDidChange(sender: AccessoryTextField) {
-        sender.validateInput()
-    }
-
-    func validationUpdated(sender: UITextField, error: TextFieldValidator.ValidationError) {
-        emailFieldValidationError = error
-    }
-
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        guard textField == self.emailInputField, self.emailInputField.isInputValid else {
-            return false
-        }
-
-        valueSubmitted(emailInputField.input)
-        return true
     }
 
     // MARK: - Email / Password Input

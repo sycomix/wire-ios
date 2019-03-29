@@ -302,8 +302,8 @@ extension AuthenticationCoordinator: AuthenticationActioner, SessionManagerCreat
             case .switchCredentialsType(let newType):
                 switchCredentialsType(newType)
 
-            case .startRegistrationFlow(let unverifiedCredential):
-                startRegistration(unverifiedCredential)
+            case .startRegistrationFlow(let unverifiedCredential, let password):
+                startRegistration(unverifiedCredential, password)
 
             case .setUserName(let userName):
                 updateUnregisteredUser(\.name, userName)
@@ -486,7 +486,7 @@ extension AuthenticationCoordinator {
      * - parameter credentials: The unverified credentials to register with.
      */
 
-    private func startRegistration(_ credentials: UnverifiedCredentials) {
+    private func startRegistration(_ credentials: UnverifiedCredentials, _ password: String?) {
         guard case let .createCredentials(unregisteredUser, _) = stateController.currentStep, let presenter = self.presenter else {
             log.error("Cannot start phone registration outside of registration flow.")
             return
@@ -496,6 +496,7 @@ extension AuthenticationCoordinator {
             if approved {
                 unregisteredUser.acceptedTermsOfService = true
                 unregisteredUser.credentials = credentials
+                unregisteredUser.password = password
                 self.sendActivationCode(credentials, unregisteredUser, isResend: false)
             }
         }
