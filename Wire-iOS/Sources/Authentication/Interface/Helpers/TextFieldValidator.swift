@@ -78,7 +78,7 @@ extension TextFieldValidator {
 
     @available(iOS 12, *)
     var passwordRules: UITextInputPasswordRules {
-        return UITextInputPasswordRules(descriptor: "minlength: \(minPasswordLength); maxlength: \(maxPasswordLength)")
+        return UITextInputPasswordRules(descriptor: "required: upper; required: lower; required: special; required: [0123456789]; max-consecutive: 3; minlength: \(minPasswordLength); maxlength: \(maxPasswordLength)")
     }
 
 }
