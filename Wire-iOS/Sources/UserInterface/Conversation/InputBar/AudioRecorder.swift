@@ -186,7 +186,7 @@ public final class AudioRecorder: NSObject, AudioRecorderType {
         guard let audioRecorder = self.audioRecorder else { return }
 
         AVSMediaManager.sharedInstance().startRecording {
-            guard self.state == .initializing else {
+            guard (self.state == .initializing || self.state == .stopped) else {
                 return AVSMediaManager.sharedInstance().stopRecording()
             }
             
