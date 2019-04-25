@@ -98,6 +98,7 @@ extension ConversationInputBarViewController {
         textfieldObserverToken = inputBar.textView.observe(\MarkdownTextView.selectedTextRange, options: [.new]) { [weak self] (textView: MarkdownTextView, change: NSKeyValueObservedChange<UITextRange?>) -> Void in
             let newValue = change.newValue ?? nil
             self?.triggerMentionsIfNeeded(from: textView, with: newValue)
+            self?.triggerEmojiShortcutsIfNeeded(from: textView, with: newValue)
         }
     }
 }

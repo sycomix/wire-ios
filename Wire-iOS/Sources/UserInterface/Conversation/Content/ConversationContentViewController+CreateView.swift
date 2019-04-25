@@ -30,6 +30,21 @@ extension ConversationContentViewController {
         mentionsSearchResultsViewController.view.fitInSuperview()
     }
 
+    @objc func createEmojiSuggestionsView() {
+        emojiSuggestionsViewController = EmojiSuggestionsViewController()
+        emojiSuggestionsViewController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        addChild(emojiSuggestionsViewController)
+        view.addSubview(emojiSuggestionsViewController.view)
+
+        NSLayoutConstraint.activate([
+            emojiSuggestionsViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emojiSuggestionsViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emojiSuggestionsViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            emojiSuggestionsViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+        ])
+    }
+
     override open var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return wr_supportedInterfaceOrientations
     }

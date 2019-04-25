@@ -25,6 +25,7 @@
 @class ConversationMediaController;
 @class UpsideDownTableView;
 @class UserSearchResultsViewController;
+@class EmojiSuggestionsViewController;
 @class ConversationTableViewDataSource;
 @class MediaPlaybackManager;
 
@@ -42,6 +43,7 @@
 @property (nonatomic) UIView *bottomContainer;
 @property (nonatomic) NSArray<NSString *> *searchQueries;
 @property (nonatomic) UserSearchResultsViewController *mentionsSearchResultsViewController;
+@property (nonatomic) EmojiSuggestionsViewController *emojiSuggestionsViewController;
 @property (nonatomic) ConversationTableViewDataSource* dataSource;
 
 - (instancetype)initWithConversation:(ZMConversation *)conversation

@@ -47,16 +47,13 @@ class SeparatorCollectionViewCell: UICollectionViewCell, SeparatorViewProtocol, 
     }
 
     private func configureSubviews() {
-
         setUp()
 
         separator.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(separator)
 
         createSeparatorConstraints()
-
         applyColorScheme(ColorScheme.default.variant)
-
     }
 
     func setUp() {

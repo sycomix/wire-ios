@@ -189,7 +189,9 @@ static NSString* ZMLogTag ZM_UNUSED = @"UI";
     self.contentViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
     self.contentViewController.bottomMargin = 16;
     self.inputBarController.mentionsView = self.contentViewController.mentionsSearchResultsViewController;
+    self.inputBarController.emojiShortcutsView = self.contentViewController.emojiSuggestionsViewController;
     self.contentViewController.mentionsSearchResultsViewController.delegate = self.inputBarController;
+    [self.inputBarController configureEmojiShortcutsView];
 }
 
 - (void)createOutgoingConnectionViewController
@@ -385,6 +387,7 @@ static NSString* ZMLogTag ZM_UNUSED = @"UI";
     if (self.conversation.isReadOnly) {
         [self.inputBarController.inputBar.textView resignFirstResponder];
         [self.inputBarController dismissMentionsIfNeeded];
+        [self.inputBarController dismissEmojiShortcutsIfNeeded];
         [self.inputBarController removeReplyComposingView];
     }
 

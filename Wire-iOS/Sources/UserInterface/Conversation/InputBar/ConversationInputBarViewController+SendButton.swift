@@ -51,6 +51,7 @@ extension ConversationInputBarViewController {
         }
         
         dismissMentionsIfNeeded()
+        dismissEmojiShortcutsIfNeeded()
     }
     
     func showAlertIfTextIsTooLong(text: String) -> Bool {

@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class ConversationInputBarViewController;
 @class AudioRecordViewController;
 @class MentionsHandler;
+@class EmojiShortcutsHandler;
+@class EmojiSuggestionsViewController;
 @protocol ZMConversationMessage;
 @protocol Dismissable;
 @protocol UserList;
@@ -72,7 +74,9 @@ typedef NS_ENUM(NSUInteger, ConversationInputBarViewControllerMode) {
 @property (nonatomic) ConversationInputBarViewControllerMode mode;
 @property (nonatomic, readonly, nullable) UIViewController *inputController;
 @property (nonatomic, strong, nullable) MentionsHandler *mentionsHandler;
+@property (nonatomic, strong, nullable) EmojiShortcutsHandler *emojiShortcutsHandler;
 @property (nonatomic, weak, nullable) id<Dismissable, UserList, KeyboardCollapseObserver> mentionsView;
+@property (nonatomic, weak, nullable) EmojiSuggestionsViewController *emojiShortcutsView;
 @property (nonatomic, strong, nullable) id textfieldObserverToken;
 @property (nonatomic, nonnull) id<AVAudioSessionType> audioSession;
 
