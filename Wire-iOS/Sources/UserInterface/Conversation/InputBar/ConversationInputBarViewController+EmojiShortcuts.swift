@@ -20,7 +20,7 @@ import UIKit
 
 extension ConversationInputBarViewController {
     var isInEmojiShortcutsFlow: Bool {
-        return mentionsHandler != nil
+        return emojiShortcutsHandler != nil
     }
 
     var canInsertEmojiSuggestion: Bool {
@@ -36,7 +36,18 @@ extension ConversationInputBarViewController {
 extension ConversationInputBarViewController: EmojiSuggestionsViewControllerDelegate {
 
     func emojiSuggestionsViewController(_ vc: EmojiSuggestionsViewController, didSelect suggestion: EmojiSuggestion) {
-        dismissEmojiShortcutsIfNeeded()
+        defer {
+            dismissEmojiShortcutsIfNeeded()
+        }
+
+        guard let handler = emojiShortcutsHandler else { return }
+        let range = handler.replacementRange
+
+        let replacementText = NSAttributedString(string: suggestion.replacement, attributes: inputBar.textView.typingAttributes)
+        inputBar.textView.replace(range, withAttributedText: replacementText)
+
+        playInputHapticFeedback()
+        dismissMentionsIfNeeded()
     }
 
 }

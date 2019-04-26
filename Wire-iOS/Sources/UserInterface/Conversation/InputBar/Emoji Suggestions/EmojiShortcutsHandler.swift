@@ -25,12 +25,12 @@ import UIKit
 @objc class EmojiShortcutsHandler: NSObject {
 
     /// The regex to use to detect standard inline emoticons.
-    fileprivate var inlineRegex: NSRegularExpression = {
+    fileprivate static var inlineRegex: NSRegularExpression = {
         try! NSRegularExpression(pattern: "([\\s]|^)([^\\s]+)", options: [.anchorsMatchLines])
     }()
 
     /// The regex to use to detect shorthands such as :smile:
-    fileprivate var suggestionRegex: NSRegularExpression = {
+    fileprivate static var suggestionRegex: NSRegularExpression = {
         try! NSRegularExpression(pattern: "([\\s]|^)(:(\\w{2,}):?)", options: [.anchorsMatchLines])
     }()
 
@@ -40,7 +40,7 @@ import UIKit
     let searchString: String
 
     /// The range of the text to replace.
-    let replacementRange: Range<String.Index>
+    let replacementRange: NSRange
 
     // MARK: - Initialization
 
@@ -49,14 +49,19 @@ import UIKit
         let wholeRange = NSRange(text.startIndex ..< text.endIndex, in: text)
         let characterPosition = max(0, cursorPosition - 1)
 
-        // 1) Try to detect inline emojis.
-        let inlineMatches = inlineRegex.matches(in: text, range: wholeRange)
+        let resultIsValidForNumberOfRanges: (Int) -> ((NSTextCheckingResult) -> Bool) = { numberOfRanges in
+            return { $0.range.contains(characterPosition) && $0.numberOfRanges == numberOfRanges }
+        }
 
-        if let inlineMatch = inlineMatches.first(where: { result in result.range.contains(characterPosition) && result.numberOfRanges == 3 }) {
-            if let inlineMatchRange = Range<String.Index>(inlineMatch.range(at: 2), in: text) {
+        // 1) Try to detect inline emojis.
+        let inlineMatches = EmojiShortcutsHandler.inlineRegex.matches(in: text, range: wholeRange)
+
+        if let inlineMatch = inlineMatches.first(where: resultIsValidForNumberOfRanges(3)) {
+            let matchRange = inlineMatch.range(at: 2)
+            if let inlineMatchRange = Range<String.Index>(matchRange, in: text) {
                 let inlineMatchText = String(text[inlineMatchRange])
                 if let canonicalName = EmojiDirectory.shared.canonicalName(for: inlineMatchText) {
-                    self.replacementRange = inlineMatchRange
+                    self.replacementRange = matchRange
                     self.searchString = canonicalName
                     return
                 }
@@ -64,14 +69,13 @@ import UIKit
         }
 
         // 2) Try to detect suggestions.
-        let matches = suggestionRegex.matches(in: text, range: wholeRange)
+        let matches = EmojiShortcutsHandler.suggestionRegex.matches(in: text, range: wholeRange)
+        guard let match = matches.first(where: resultIsValidForNumberOfRanges(4)) else { return nil }
 
-        // Cursor is a separator between characters, we are interested in the character before the cursor
-        guard let match = matches.first(where: { result in result.range.contains(characterPosition) && result.numberOfRanges == 4 }) else { return nil }
-
-        guard let searchStringRange = Range<String.Index>(match.range(at: 3), in: text) else { return nil }
+        let matchRange = match.range(at: 3)
+        guard let searchStringRange = Range<String.Index>(matchRange, in: text) else { return nil }
         searchString = String(text[searchStringRange])
-        replacementRange = searchStringRange
+        replacementRange = matchRange
     }
 
 }
