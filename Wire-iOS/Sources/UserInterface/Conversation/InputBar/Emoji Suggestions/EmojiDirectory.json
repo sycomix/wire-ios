@@ -1404,7 +1404,35 @@
     "o:)" : "1F607",
     "O:)" : "1F607"
   },
-  "variations": {
-
+  "transforms": {
+      "cop": ["skin_tone", "suggest_woman"],
+      "dancer": ["skin_tone", "suggest_man"],
+      "dancers": ["skin_tone", "suggest_man"],
+      "ear": ["skin_tone"],
+      "girl": ["skin_tone"],
+      "haircut": ["skin_tone", "suggest_man"],
+      "hand": ["skin_tone"],
+      "information_desk_person": ["skin_tone", "suggest_man"],
+      "man": ["skin_tone"],
+      "woman": ["skin_tone"],
+      "woman-heart-woman": ["skin_tone"],
+      "woman-kiss-woman": ["skin_tone"],
+      "family-woman-woman-boy": ["skin_tone"],
+      "family-woman-woman-boy-boy": ["skin_tone"],
+      "family-woman-woman-girl": ["skin_tone"],
+      "family-woman-woman-girl-boy": ["skin_tone"],
+      "family-woman-woman-girl-girl": ["skin_tone"],
+      "walking": ["skin_tone", "suggest_woman"],
+      "weight_lifter": ["skin_tone", "suggest_woman"],
+      "wave": ["skin_tone"],
+      "victory_hamd": ["skin_tone"],
+      "peace_hand": ["skin_tone"],
+      "two_men_holding_hands": ["skin_tone"],
+      "two_women_holding_hands": ["skin_tone"],
+      "thumbsdown": ["skin_tone"],
+      "thumbsup": ["skin_tone"],
+      "the_horns_hand": ["skin_tone"],
+      "swimmer": ["skin_tone", "suggest_woman"],
+      "surfer": ["skin_tone", "suggest_woman"]
   }
 }

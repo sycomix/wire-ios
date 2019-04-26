@@ -27,9 +27,41 @@ struct EmojiSuggestion {
     let replacement: String
 }
 
+/**
+ * The emoji skin tones.
+ */
+
+enum EmojiSkinTone: String {
+
+    case none
+    case light
+    case mediumLight
+    case medium
+    case mediumDark
+    case dark
+
+    var modifier: String {
+        switch self {
+        case .none: return ""
+        case .light: return "\u{1F3FB}"
+        case .mediumLight: return "\u{1F3FC}"
+        case .medium: return "\u{1F3FD}"
+        case .mediumDark: return "\u{1F3FE}"
+        case .dark: return "\u{1F3FF}"
+        }
+    }
+
+}
+
 private struct EmojiMatch {
     let suggestion: EmojiSuggestion
     let points: Int
+}
+
+enum EmojiTransform: String, Codable {
+    case skinTone = "skin_tone"
+    case suggestMan = "suggest_man"
+    case suggestWoman = "suggest_woman"
 }
 
 class EmojiDirectory: Decodable {
@@ -48,6 +80,9 @@ class EmojiDirectory: Decodable {
     /// The map from symbol names to their Unicode representation.
     let namedSymbols: [String: String]
 
+    /// The transforms that can be applied to an emoji.
+    let transforms: [String: Set<EmojiTransform>]
+
     // MARK: - Query
 
     func canonicalName(for inlineString: String) -> String? {
@@ -64,13 +99,57 @@ class EmojiDirectory: Decodable {
         let namedMatches: [EmojiSuggestion] = namedSymbols
             .lazy
             .filter { $0.key.contains(query) }
-            .map { EmojiSuggestion(shortcut: $0.key, replacement: $0.value) }
+            .flatMap { self.expandedSuggestions(for: $0.key, initialReplacement: $0.value) }
             .sorted { $0.shortcut < $1.shortcut }
 
         matches.append(contentsOf: namedMatches)
         return matches
     }
 
+    private func expandedSuggestions(for shortcut: String, initialReplacement: String) -> [EmojiSuggestion] {
+        if let transforms = self.transforms[shortcut], !transforms.isEmpty {
+            var results: [EmojiSuggestion] = []
+
+            for transform in transforms {
+                var transformedReplacement = initialReplacement
+
+                switch transform {
+                case .skinTone:
+                    transformedReplacement += EmojiSkinTone.medium.modifier
+                case .suggestMan:
+                    if transforms.contains(.skinTone) {
+                        transformedReplacement += EmojiSkinTone.medium.modifier
+                    }
+
+                    transformedReplacement += "\u{200D}\u{2642}\u{FE0F}"
+                case .suggestWoman:
+                    if transforms.contains(.skinTone) {
+                        transformedReplacement += EmojiSkinTone.medium.modifier
+                    }
+
+                    transformedReplacement += "\u{200D}\u{2640}\u{FE0F}"
+                }
+
+                results.append(EmojiSuggestion(shortcut: shortcut, replacement: transformedReplacement))
+            }
+
+            return results
+        } else {
+            return [EmojiSuggestion(shortcut: shortcut, replacement: initialReplacement)]
+        }
+    }
+
     // MARK: - Matching
+
+    func applyTransform(_ transform: EmojiTransform, to emoji: String) -> String {
+        switch transform {
+        case .skinTone:
+            return emoji + "\u{1F3FC}"
+        case .suggestMan:
+            return emoji + "\u{200D}\u{2642}\u{FE0F}"
+        case .suggestWoman:
+            return emoji + "\u{200D}\u{2640}\u{FE0F}"
+        }
+    }
 
 }
