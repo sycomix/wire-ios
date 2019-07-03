@@ -20,6 +20,46 @@ import Foundation
 
 extension ShareContactsViewController {
 
+    // MARK: - Actions
+    @objc
+    func shareContacts(_ sender: Any) {
+        AddressBookHelper.sharedHelper.requestPermissions({ [weak self] success in
+            guard let self = self else { return }
+            
+            if success {
+                AddressBookHelper.sharedHelper.startRemoteSearch(self.uploadAddressBookImmediately)
+                self.delegate.shareContactsViewControllerDidFinish(self)
+            } else {
+                self.displayContactsAccessDeniedMessage(animated: true)
+            }
+        })
+    }
+    
+    @objc
+    func shareContactsLater(_ sender: Any) {
+        AddressBookHelper.sharedHelper.addressBookSearchWasPostponed = true
+        delegate.shareContactsViewControllerDidSkip(self)
+    }
+
+    /*
+    - (IBAction)shareContacts:(id)sender
+    {
+    [AddressBookHelper.sharedHelper requestPermissions:^(BOOL success) {
+    if (success) {
+    [[AddressBookHelper sharedHelper] startRemoteSearchWithCheckingIfEnoughTimeSinceLast:self.uploadAddressBookImmediately];
+    [self.delegate  shareContactsViewControllerDidFinish:self];
+    } else {
+    [self displayContactsAccessDeniedMessageAnimated:YES];
+    }
+    }];
+    }
+    
+    - (IBAction)shareContactsLater:(id)sender
+    {
+    [AddressBookHelper sharedHelper].addressBookSearchWasPostponed = YES;
+    [self.delegate shareContactsViewControllerDidSkip:self];
+    }
+*/
     // MARK: - Constraints
     @objc
     func createConstraints() {
@@ -78,4 +118,13 @@ extension ShareContactsViewController {
     }
 }
 
-
+extension ShareContactsViewController: ShareContactsViewControllerDelegate {
+    func shareContactsViewControllerDidSkip(_ viewController: UIViewController) {
+        //no-op, override by ContactsViewController
+    }
+    
+    func shareContactsViewControllerDidFinish(_ viewController: UIViewController) {
+        //no-op, override by ContactsViewController
+    }
+        
+}

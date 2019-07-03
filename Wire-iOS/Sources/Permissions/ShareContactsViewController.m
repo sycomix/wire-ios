@@ -127,26 +127,6 @@
     self.notNowButton.hidden = self.notNowButtonHidden;
 }
 
-#pragma mark - Actions
-
-- (IBAction)shareContacts:(id)sender
-{
-    [AddressBookHelper.sharedHelper requestPermissions:^(BOOL success) {
-        if (success) {
-            [[AddressBookHelper sharedHelper] startRemoteSearchWithCheckingIfEnoughTimeSinceLast:self.uploadAddressBookImmediately];
-            [self.delegate shareContactsViewControllerDidFinish:self];
-        } else {
-            [self displayContactsAccessDeniedMessageAnimated:YES];
-        }
-    }];
-}
-
-- (IBAction)shareContactsLater:(id)sender
-{
-    [AddressBookHelper sharedHelper].addressBookSearchWasPostponed = YES;
-    [self.delegate shareContactsViewControllerDidSkip:self];
-}
-
 
 #pragma mark - PermissionDeniedViewControllerDelegate
 
