@@ -2,13 +2,13 @@
 
 import PackageDescription
 
-let package = Package(
-    name: "update_stylekit",
-    dependencies: [],
-    targets: [
-        .target(
-            name: "update_stylekit",
-            dependencies: [],
-            path: "."),
-    ]
-)
+//let package = Package(
+//    name: "update_stylekit",
+//    dependencies: [],
+//    targets: [
+//        .target(
+//            name: "update_stylekit",
+//            dependencies: [],
+//            path: "."),
+//    ]
+//)

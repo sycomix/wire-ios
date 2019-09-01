@@ -21,14 +21,14 @@ import XCTest
 @testable import Wire
 
 class RandomGeneratorFromDataTests: ZMSnapshotTestCase {
-    func testThatItGeneratesAPseudorandom() {
-        // GIVEN
-        let uuid = NSUUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")! as UUID
-        // WHEN
-        let random: Int = RandomGeneratorFromData(uuid: uuid).rand()
-        // THEN
-        XCTAssertEqual(6505850725663318502, random)
-    }
+//    func testThatItGeneratesAPseudorandom() {
+//        // GIVEN
+//        let uuid = NSUUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")! as UUID
+//        // WHEN
+//        let random: Int = RandomGeneratorFromData(uuid: uuid).rand()
+//        // THEN
+//        XCTAssertEqual(6505850725663318502, random)
+//    }
     
     func testThatItGeneratesAStablePseudorandom() {
         // GIVEN
