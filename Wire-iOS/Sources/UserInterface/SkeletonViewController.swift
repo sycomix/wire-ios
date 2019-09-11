@@ -20,7 +20,7 @@ import UIKit
 import Cartography
 import WireUtilities
 
-class ListSkeletonCellNameItemView: UIView {
+final class ListSkeletonCellNameItemView: UIView {
     
     init() {
         super.init(frame: CGRect.zero)
@@ -35,7 +35,7 @@ class ListSkeletonCellNameItemView: UIView {
     }
 }
 
-class ListSkeletonCellView : UIView {
+final class ListSkeletonCellView : UIView {
     
     let avatarView : UIView
     let lineView : ListSkeletonCellNameItemView
@@ -164,7 +164,7 @@ class ListSkeletonContentView : UITableView, UITableViewDataSource {
     
 }
 
-final class ListSkeletonView  : UIView {
+final class ListSkeletonView: UIView {
     
     let titleItem: ListSkeletonCellNameItemView
     let accountView : BaseAccountView
@@ -172,8 +172,8 @@ final class ListSkeletonView  : UIView {
     var buttonRowView : UIStackView!
 
     init(_ account: Account) {
-        self.titleItem = ListSkeletonCellNameItemView()
-        self.accountView = AccountViewFactory.viewFor(account: account, displayContext: .conversationListHeader) as BaseAccountView
+        self.titleItem = ListSkeletonCellNameItemView() ///TODO: alignment
+        self.accountView = AccountViewFactory.viewFor(account: account, displayContext: .conversationListHeader) as BaseAccountView ///TODO: alignment
         self.listContentView = ListSkeletonContentView()
         
         super.init(frame: CGRect.zero)
@@ -205,7 +205,7 @@ final class ListSkeletonView  : UIView {
     func createConstraints() {
         constrain(self, accountView, titleItem, buttonRowView, listContentView) { (containerView, accountView, titleItem, buttonRowView, listContentView) in
             
-            accountView.left == containerView.left + 9
+            accountView.left == containerView.left + CGFloat.ConversationList.horizontalMargin
             accountView.top == containerView.top + UIScreen.safeArea.top
             
             titleItem.centerY == accountView.centerY
