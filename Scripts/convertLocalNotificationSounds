@@ -32,8 +32,8 @@ input_folder = os.path.join(built_products_dir, audio_name)
 app_resources = os.path.join(built_products_dir, resources_path)
 
 for name in files:
-    input_path = os.path.join(input_folder, name) + ".m4a"
-    output_path = os.path.join(app_resources, name) + ".caf"
+    input_path = f"{os.path.join(input_folder, name)}.m4a"
+    output_path = f"{os.path.join(app_resources, name)}.caf"
     sys.stdout.write("Creating {0}".format(output_path))
     subprocess.check_call([
         "xcrun", "afconvert",

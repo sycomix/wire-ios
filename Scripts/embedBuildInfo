@@ -42,7 +42,7 @@ def parse_dependency_version_numbers(source_root):
     cartfile_resolved = open(carfile_resolved_path, "r")
     stripQuotes = lambda string: re.sub('"', '', string)
 
-    for line in cartfile_resolved.readlines():
+    for line in cartfile_resolved:
         if line.strip() == "":
             continue
         dependency = line.split()
@@ -77,9 +77,9 @@ def write_property_list_to_path(plist, path, plist_format=Foundation.NSPropertyL
 
 def check_environment(names):
     for name in names:
-      if not name in os.environ:
-          sys.stderr.write("error: {0} not found in the environment.\n".format(name))
-          sys.exit(-1)
+        if name not in os.environ:
+            sys.stderr.write("error: {0} not found in the environment.\n".format(name))
+            sys.exit(-1)
 
 def update_info_plist(repositories, output_path=None):
 
